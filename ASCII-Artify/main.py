@@ -1,7 +1,7 @@
-import sys
-import argparse
-from rich.console import Console
+import cv2
 from PIL import Image
+from io import BytesIO
+from rich.console import Console
 
 # Define your character ramp
 ASCII_CHARS = "@%#*+=-:. "
@@ -32,7 +32,6 @@ def print_colored_ascii(image, new_width=100):
     console = Console()
 
     # Build the ASCII string and print with RGB colors
-    ascii_str = ""
     for index, pixel_value in enumerate(grayscale_image.getdata()):
         r, g, b = rgb_data[index]
         char = map_pixel_to_char(pixel_value, ASCII_CHARS)
@@ -40,27 +39,37 @@ def print_colored_ascii(image, new_width=100):
         console.print(char, end="", style=f"rgb({r},{g},{b})")
         # Add a newline after every width characters
         if (index + 1) % resized_image.width == 0:
-            ascii_str += "\n"
-            console.print("")
+            console.print("")  # Print a newline
 
-def main():
-    parser = argparse.ArgumentParser(description="Converts images to ASCII art with colors.")
-    parser.add_argument("image_path", help="Path to the image file.")
-    parser.add_argument("--chars", type=int, default=100, help="Width of the ASCII art in characters. Default is 100.")
+def capture_webcam():
+    # Initialize OpenCV capture object
+    cap = cv2.VideoCapture(0)
 
-    args = parser.parse_args()
+    if not cap.isOpened():
+        print("Error: Could not open webcam.")
+        return
 
     try:
-        image = Image.open(args.image_path)
-    except FileNotFoundError:
-        print(f"Error: File not found at '{args.image_path}'")
-        return
-    except IOError:
-        print(f"Error: Cannot open image file '{args.image_path}'. Please check the file format and permissions.")
-        return
+        while True:
+            ret, frame = cap.read()
+            if not ret:
+                break
 
-    # Print the colored ASCII art
-    print_colored_ascii(image, args.chars)
+            # Convert BRG (OpenCV) to RGB (Pillow)
+            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+            # Convert to Pillow Image
+            pil_image = Image.fromarray(frame_rgb)
+
+            # Print ASCII art of the current frame
+            print_colored_ascii(pil_image, new_width=100)
+            
+            # Wait a bit for better visualization
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+    finally:
+        cap.release()
+        cv2.destroyAllWindows()
 
 if __name__ == "__main__":
-    main()
+    capture_webcam()
