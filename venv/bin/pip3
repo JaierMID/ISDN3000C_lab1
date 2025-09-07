@@ -1,5 +1,5 @@
 #!/bin/sh
-'''exec' "/Users/hewu888/Desktop/works/Learning_New/HKUST/ISDN3000C-Computing for makers/lab1/ISDN3000C_lab1/venv/bin/python3.11" "$0" "$@"
+'''exec' "/Users/hewu888/Desktop/works/Learning_New/HKUST/ISDN3000C-Computing for makers/lab1/ISDN3000C_lab1/venv/bin/python" "$0" "$@"
 ' '''
 # -*- coding: utf-8 -*-
 import re
